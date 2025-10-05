@@ -1,0 +1,86 @@
+import React from 'react';
+import { DashboardIcon, MapIcon, AlertIcon, WorkoutIcon, ProfileIcon, LogoutIcon } from './icons';
+import type { View } from '../types';
+import { useAuth } from '../contexts/AuthContext';
+
+
+interface SidebarProps {
+  currentView: View;
+  setCurrentView: (view: View) => void;
+}
+
+const NavItem: React.FC<{
+  label: string;
+  icon: React.ReactNode;
+  isActive: boolean;
+  onClick: () => void;
+}> = ({ label, icon, isActive, onClick }) => (
+  <li
+    onClick={onClick}
+    className={`
+      flex items-center px-4 py-3 cursor-pointer rounded-lg relative
+      transition-all duration-200 group
+      ${isActive ? 'text-white' : 'text-gray-400 hover:bg-gray-700/50 hover:text-white'}
+    `}
+  >
+    {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-r-full"></div>}
+    <div className={`w-6 h-6 mr-4 ${isActive ? 'text-blue-400' : 'text-gray-500 group-hover:text-gray-300'}`}>{icon}</div>
+    <span className="font-semibold">{label}</span>
+  </li>
+);
+
+const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView }) => {
+  const { logout } = useAuth();
+
+  const navItems = [
+    { view: 'dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
+    { view: 'map', label: 'Geospatial Map', icon: <MapIcon /> },
+    { view: 'alerts', label: 'Alerts', icon: <AlertIcon /> },
+    { view: 'workouts', label: 'Activity Log', icon: <WorkoutIcon /> },
+    { view: 'profile', label: 'Profile', icon: <ProfileIcon /> },
+  ] as const;
+
+  return (
+    <aside className="w-64 bg-gray-900/80 backdrop-blur-sm p-4 flex flex-col flex-shrink-0 border-r border-gray-700/60">
+      <div className="flex items-center mb-12 px-2">
+        <svg className="w-10 h-10 text-blue-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" strokeWidth="1.5"/>
+            <path opacity="0.6" d="M2 17l10 5 10-5" stroke="currentColor" strokeWidth="1.5"/>
+            <path opacity="0.6" d="M2 12l10 5 10-5" stroke="currentColor" strokeWidth="1.5"/>
+        </svg>
+
+        <h1 className="text-2xl font-bold ml-2 text-gray-100 tracking-wider">AETHERFIT</h1>
+      </div>
+      <nav className="flex-grow">
+        <ul className="space-y-3">
+          {navItems.map((item) => (
+            <NavItem
+              key={item.view}
+              label={item.label}
+              icon={item.icon}
+              isActive={currentView === item.view}
+              onClick={() => setCurrentView(item.view)}
+            />
+          ))}
+        </ul>
+      </nav>
+      <div>
+        <li
+            onClick={logout}
+            className={`
+              flex items-center px-4 py-3 cursor-pointer rounded-lg relative
+              transition-all duration-200 group text-gray-400 hover:bg-red-500/20 hover:text-red-300
+            `}
+          >
+            <div className="w-6 h-6 mr-4 text-gray-500 group-hover:text-red-400"><LogoutIcon /></div>
+            <span className="font-semibold">Logout</span>
+        </li>
+        <div className="px-4 pt-4 text-gray-600 text-xs">
+          <p>© 2025 AetherFit Systems</p>
+        </div>
+      </div>
+    </aside>
+  );
+};
+
+export default Sidebar;

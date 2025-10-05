@@ -1,0 +1,167 @@
+import React, { useState } from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { getMockWorkouts, performanceChartData } from '../services/mockData';
+import type { Workout } from '../types';
+import { RunningIcon, CyclingIcon, HikingIcon, CloseIcon } from './icons';
+
+const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => (
+    <div className={`bg-gray-900/60 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 ${className}`}>
+        {children}
+    </div>
+);
+
+const WorkoutModal: React.FC<{ isOpen: boolean; onClose: () => void; onAddWorkout: (workout: Omit<Workout, 'id' | 'date' | 'avgAqfa'>) => void; }> = ({ isOpen, onClose, onAddWorkout }) => {
+    const [type, setType] = useState<'Running' | 'Cycling' | 'Hiking'>('Running');
+    const [duration, setDuration] = useState('');
+    const [location, setLocation] = useState('');
+    const [performance, setPerformance] = useState('');
+
+    if (!isOpen) return null;
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onAddWorkout({
+            type,
+            duration: Number(duration),
+            location,
+            performance: Number(performance),
+        });
+        // Reset form
+        setType('Running');
+        setDuration('');
+        setLocation('');
+        setPerformance('');
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-gray-800 rounded-2xl border border-gray-700 p-8 w-full max-w-md m-4 relative">
+                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white">
+                    <CloseIcon className="w-6 h-6" />
+                </button>
+                <h2 className="text-2xl font-bold text-white mb-6">Log New Activity</h2>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Activity Type</label>
+                        <select value={type} onChange={(e) => setType(e.target.value as any)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-blue-500 focus:border-blue-500">
+                            <option>Running</option>
+                            <option>Cycling</option>
+                            <option>Hiking</option>
+                        </select>
+                    </div>
+                     <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Location</label>
+                        <input type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g., Golden Gate Park" className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-blue-500 focus:border-blue-500" required />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                           <label className="block text-sm font-medium text-gray-300 mb-2">Duration (min)</label>
+                           <input type="number" value={duration} onChange={e => setDuration(e.target.value)} placeholder="e.g., 45" className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-blue-500 focus:border-blue-500" required />
+                        </div>
+                         <div>
+                           <label className="block text-sm font-medium text-gray-300 mb-2">Performance (1-10)</label>
+                           <input type="number" value={performance} onChange={e => setPerformance(e.target.value)} min="1" max="10" placeholder="e.g., 8" className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-blue-500 focus:border-blue-500" required />
+                        </div>
+                    </div>
+                    <div className="pt-4">
+                        <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg transition-colors">Log Activity</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+
+const Workouts: React.FC = () => {
+    const [workouts, setWorkouts] = useState<Workout[]>(getMockWorkouts());
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const handleAddWorkout = (newWorkoutData: Omit<Workout, 'id' | 'date' | 'avgAqfa'>) => {
+        const newWorkout: Workout = {
+            id: Math.max(...workouts.map(w => w.id), 0) + 1,
+            ...newWorkoutData,
+            date: new Date().toISOString().split('T')[0].replace(/-/g, '-'), // format YYYY-MM-DD
+            avgAqfa: Math.round((Math.random() * 4 + 6) * 10) / 10, // Random AQFA 6.0-10.0
+        };
+        setWorkouts([newWorkout, ...workouts]);
+        setIsModalOpen(false);
+    };
+
+    const getIconForType = (type: Workout['type']) => {
+        const props = { className: "w-5 h-5 mr-3 text-blue-400" };
+        if (type === 'Running') return <RunningIcon {...props} />;
+        if (type === 'Cycling') return <CyclingIcon {...props} />;
+        if (type === 'Hiking') return <HikingIcon {...props} />;
+        return null;
+    };
+    
+    return (
+        <div className="space-y-6">
+            <div className="flex justify-between items-center">
+                <h1 className="text-3xl font-bold text-white">Activity Log</h1>
+                <button onClick={() => setIsModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                    + Log Activity
+                </button>
+            </div>
+
+            <Card>
+                <h2 className="text-lg font-semibold text-white mb-4">AQFA vs Performance Correlation</h2>
+                <div style={{ width: '100%', height: 300 }}>
+                    <ResponsiveContainer>
+                        <LineChart data={performanceChartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#4a5568" strokeOpacity={0.3} />
+                            <XAxis dataKey="name" stroke="#a0aec0" />
+                            <YAxis stroke="#a0aec0" />
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: 'rgba(17, 24, 39, 0.8)',
+                                    borderColor: '#4a5568',
+                                }}
+                            />
+                            <Legend />
+                            <Line type="monotone" dataKey="performance" stroke="#4ade80" strokeWidth={2} name="Performance" />
+                            <Line type="monotone" dataKey="aqfa" stroke="#3b82f6" strokeWidth={2} name="Avg AQFA" />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </div>
+            </Card>
+
+            <Card>
+                <h2 className="text-lg font-semibold text-white mb-4">Recent Activity</h2>
+                <div className="overflow-x-auto">
+                    <table className="min-w-full text-sm text-left">
+                        <thead className="text-xs text-gray-400 uppercase border-b border-gray-700">
+                            <tr>
+                                <th scope="col" className="px-6 py-3">Activity</th>
+                                <th scope="col" className="px-6 py-3">Location</th>
+                                <th scope="col" className="px-6 py-3">Duration</th>
+                                <th scope="col" className="px-6 py-3">Date</th>
+                                <th scope="col" className="px-6 py-3">Avg AQFA</th>
+                                <th scope="col" className="px-6 py-3">Performance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {workouts.map((workout) => (
+                                <tr key={workout.id} className="border-b border-gray-800 hover:bg-gray-800/50">
+                                    <td className="px-6 py-4 font-medium text-white whitespace-nowrap flex items-center">
+                                        {getIconForType(workout.type)}
+                                        {workout.type}
+                                    </td>
+                                    <td className="px-6 py-4 text-gray-300">{workout.location}</td>
+                                    <td className="px-6 py-4 text-gray-300">{workout.duration} min</td>
+                                    <td className="px-6 py-4 text-gray-300">{workout.date}</td>
+                                    <td className="px-6 py-4 font-semibold text-blue-400">{workout.avgAqfa.toFixed(1)}</td>
+                                    <td className="px-6 py-4 font-semibold text-green-400">{workout.performance}/10</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </Card>
+            <WorkoutModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onAddWorkout={handleAddWorkout} />
+        </div>
+    );
+};
+
+export default Workouts;

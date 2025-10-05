@@ -1,0 +1,105 @@
+import type { User } from '../types';
+
+// Simulate a database of users stored in localStorage
+const USERS_KEY = 'aetherfit_users';
+
+// A simple (and insecure) way to "hash" a password for this demo.
+// In a real app, use a library like bcrypt.
+const pseudoEncrypt = (password: string): string => {
+    return `encrypted_${password.split('').reverse().join('')}`;
+};
+
+const getStoredUsers = (): (User & { passwordHash: string })[] => {
+    try {
+        const usersJson = localStorage.getItem(USERS_KEY);
+        return usersJson ? JSON.parse(usersJson) : [];
+    } catch (e) {
+        return [];
+    }
+};
+
+const saveStoredUsers = (users: (User & { passwordHash: string })[]): void => {
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+};
+
+export const authService = {
+    login: async (identifier: string, password: string): Promise<User> => {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                const users = getStoredUsers();
+                const lowerCaseIdentifier = identifier.toLowerCase();
+                const passwordHash = pseudoEncrypt(password);
+
+                const userRecord = users.find(
+                    u => (u.email.toLowerCase() === lowerCaseIdentifier || u.name.toLowerCase() === lowerCaseIdentifier)
+                );
+
+                if (userRecord && userRecord.passwordHash === passwordHash) {
+                    const { passwordHash, ...user } = userRecord;
+                    localStorage.setItem('authUser', JSON.stringify(user));
+                    resolve(user);
+                } else {
+                    reject(new Error('Invalid credentials. Please check your username/password.'));
+                }
+            }, 500); // Simulate network delay
+        });
+    },
+
+    register: async (
+        name: string,
+        email: string,
+        password: string,
+        location: string,
+        primaryActivity: 'Running' | 'Cycling' | 'Hiking'
+    ): Promise<User> => {
+         return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                const users = getStoredUsers();
+                const lowerCaseEmail = email.toLowerCase();
+                
+                if (users.some(u => u.email.toLowerCase() === lowerCaseEmail)) {
+                    return reject(new Error("An account with this email already exists."));
+                }
+                
+                if (password.length < 6) {
+                    return reject(new Error("Password must be at least 6 characters long."));
+                }
+
+                const newUser: User = {
+                    id: String(Date.now()),
+                    name,
+                    email,
+                    location,
+                    primaryActivity,
+                };
+
+                const newUserRecord = {
+                    ...newUser,
+                    passwordHash: pseudoEncrypt(password),
+                };
+
+                users.push(newUserRecord);
+                saveStoredUsers(users);
+
+                resolve(newUser);
+            }, 500);
+        });
+    },
+
+    logout: (): void => {
+        localStorage.removeItem('authUser');
+    },
+
+    getCurrentUser: (): User | null => {
+        const userJson = localStorage.getItem('authUser');
+        if (userJson) {
+            try {
+                return JSON.parse(userJson) as User;
+            } catch (error) {
+                console.error("Failed to parse auth user from localStorage", error);
+                return null;
+            }
+        }
+        return null;
+    }
+};

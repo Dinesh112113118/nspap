@@ -1,0 +1,58 @@
+import type { WeatherData, AQIData, AetherFitResponse } from '../types';
+
+/**
+ * Fallback function to provide mock data, bypassing the API call as requested for stability.
+ * This ensures the application is demo-ready for the hackathon without needing a live API key.
+ */
+const getFallbackResponse = (activity: string): AetherFitResponse => {
+    const recommendations = [
+        {
+            activity: "Running",
+            time: "6:00 AM - 8:00 AM",
+            location: "Golden Gate Park",
+            score: 8.2
+        },
+        {
+            activity: "Cycling",
+            time: "5:00 PM - 7:00 PM",
+            location: "Embarcadero Trail",
+            score: 7.8
+        },
+        {
+            activity: "Hiking",
+            time: "9:00 AM - 12:00 PM",
+            location: "Mount Tamalpais",
+            score: 9.1
+        }
+    ];
+
+    // Find a recommendation that matches the current activity, or default to the first one.
+    const selectedRecommendation = recommendations.find(r => r.activity === activity) || recommendations[0];
+
+    return {
+        aqfaScore: 7.5,
+        summary: `Demo mode: Conditions are favorable for ${activity}.`,
+        // Show the selected one and one other recommendation
+        recommendations: [selectedRecommendation, ...recommendations.filter(r => r.activity !== activity).slice(0, 1)],
+        pollutantBreakdown: [
+            { pollutant: "Ozone", level: "Low", effect: "Minimal impact on respiratory function." },
+            { pollutant: "PM2.5", level: "Moderate", effect: "Slight reduction in lung capacity during intense exercise." },
+            { pollutant: "NO2", level: "Low", effect: "No significant impact on performance." }
+        ],
+    };
+};
+
+/**
+ * This function now exclusively uses the local fallback data to prevent API key errors.
+ * It simulates a short network delay for a more realistic user experience.
+ */
+export const getAetherFitAnalysis = async (
+    activity: string,
+    _weather: WeatherData, // parameter is kept for type consistency but marked as unused
+    _aqi: AQIData // parameter is kept for type consistency but marked as unused
+): Promise<AetherFitResponse> => {
+    console.warn("AetherFit is running in local demo mode. API calls are disabled to ensure stability.");
+    // Simulate a short network delay for a more realistic feel.
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return getFallbackResponse(activity);
+};
