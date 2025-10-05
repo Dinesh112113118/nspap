@@ -9,4 +9,6 @@ export {
     Footprints as RunningIcon,
     Mountain as HikingIcon,
     X as CloseIcon,
+    CheckCircle2 as SuccessIcon,
+    Info as InfoIcon,
 } from 'lucide-react';

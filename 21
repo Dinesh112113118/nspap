@@ -1,4 +1,4 @@
-import type { WeatherData, AQIData, Workout, LiveTelemetryData, Alert, AtmosphericData } from '../types';
+import type { WeatherData, AQIData, Workout, LiveTelemetryData, Alert, AtmosphericData, Notification } from '../types';
 import { LatLng } from 'leaflet';
 
 export const getMockWeatherData = (): WeatherData => ({
@@ -115,3 +115,38 @@ export const getAqi24HourTrendData = () => {
     }
     return data;
 };
+
+export const getMockNotifications = (): Notification[] => [
+    {
+        id: 1,
+        title: 'High PM2.5 Warning',
+        description: 'PM2.5 levels are currently at 42 µg/m³ in your area. Consider indoor activities.',
+        timestamp: '15m ago',
+        read: false,
+        type: 'alert',
+    },
+    {
+        id: 2,
+        title: 'Optimal Running Window',
+        description: 'AQFA score for running is 8.5 for the next 2 hours. Great time for a run!',
+        timestamp: '1h ago',
+        read: false,
+        type: 'success',
+    },
+    {
+        id: 3,
+        title: 'New Activity Logged',
+        description: 'Your 45-minute run in Golden Gate Park has been successfully logged.',
+        timestamp: '3h ago',
+        read: true,
+        type: 'info',
+    },
+    {
+        id: 4,
+        title: 'Weekend Hike Suggestion',
+        description: 'Weather and air quality look perfect for a hike at Mount Tamalpais this Saturday.',
+        timestamp: '1d ago',
+        read: true,
+        type: 'info',
+    },
+];

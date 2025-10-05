@@ -19,13 +19,13 @@
   }
 }
 
-/* Leaflet Dark Theme Overrides */
+/* Leaflet Light Theme Overrides */
 .leaflet-popup-content-wrapper, .leaflet-popup-tip {
-    background: #1f2937; /* bg-gray-800 */
-    color: #d1d5db; /* text-gray-300 */
+    background: #ffffff; /* bg-white */
+    color: #1f2937; /* text-gray-800 */
     border-radius: 8px;
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    border: 1px solid rgb(55 65 81 / 0.5);
+    border: 1px solid #e5e7eb; /* border-gray-200 */
 }
 .leaflet-popup-content {
     margin: 13px 20px 13px 15px;
@@ -33,12 +33,9 @@
     line-height: 1.4;
 }
 a.leaflet-popup-close-button {
-    color: #9ca3af !important; /* text-gray-400 */
+    color: #6b7280 !important; /* text-gray-500 */
     padding: 8px 8px 0 0;
 }
-.leaflet-container a.leaflet-popup-close-button {
-    color: #9ca3af;
-}
 .leaflet-container a.leaflet-popup-close-button:hover {
-    color: #ffffff;
+    color: #374151; /* text-gray-700 */
 }

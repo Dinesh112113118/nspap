@@ -24,6 +24,15 @@ export interface Alert {
     enabled: boolean;
 }
 
+export interface Notification {
+    id: number;
+    title: string;
+    description: string;
+    timestamp: string;
+    read: boolean;
+    type: 'alert' | 'info' | 'success';
+}
+
 export interface WeatherData {
     temperature: number;
     condition: string;

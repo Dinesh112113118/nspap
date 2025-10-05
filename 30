@@ -1,0 +1,102 @@
+import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import type { Notification } from '../types';
+import { AlertIcon, SuccessIcon, InfoIcon, CloseIcon } from './icons';
+import { BellRing, CheckCircle2 } from 'lucide-react';
+
+const icons = {
+    alert: <AlertIcon className="w-5 h-5 text-red-400" />,
+    success: <SuccessIcon className="w-5 h-5 text-green-400" />,
+    info: <InfoIcon className="w-5 h-5 text-blue-400" />,
+};
+
+const NotificationItem: React.FC<{ notification: Notification; onMarkAsRead: (id: number) => void; }> = ({ notification, onMarkAsRead }) => (
+    <div
+        className={`flex items-start p-4 border-b border-gray-700/50 transition-colors ${!notification.read ? 'bg-blue-900/20' : 'hover:bg-gray-800/50'}`}
+    >
+        <div className="flex-shrink-0 mt-1 mr-4">
+            {icons[notification.type]}
+        </div>
+        <div className="flex-grow">
+            <p className={`font-semibold ${!notification.read ? 'text-white' : 'text-gray-300'}`}>{notification.title}</p>
+            <p className="text-sm text-gray-400">{notification.description}</p>
+            <p className="text-xs text-gray-500 mt-1">{notification.timestamp}</p>
+        </div>
+        {!notification.read && (
+            <button onClick={() => onMarkAsRead(notification.id)} className="ml-4 p-1 rounded-full hover:bg-gray-700 text-gray-500 hover:text-white" title="Mark as read">
+                <CheckCircle2 className="w-4 h-4" />
+            </button>
+        )}
+    </div>
+);
+
+
+const NotificationsPanel: React.FC<{
+    isOpen: boolean;
+    onClose: () => void;
+    notifications: Notification[];
+    setNotifications: React.Dispatch<React.SetStateAction<Notification[]>>;
+}> = ({ isOpen, onClose, notifications, setNotifications }) => {
+
+    const unreadCount = notifications.filter(n => !n.read).length;
+
+    const handleMarkAsRead = (id: number) => {
+        setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    };
+
+    const handleMarkAllAsRead = () => {
+        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    };
+
+    return (
+        <AnimatePresence>
+            {isOpen && (
+                <>
+                    {/* Backdrop */}
+                    <motion.div
+                        className="fixed inset-0 z-30 bg-black/30"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={onClose}
+                    />
+
+                    {/* Panel */}
+                    <motion.div
+                        className="absolute top-20 right-8 w-full max-w-md bg-gray-800/80 backdrop-blur-xl border border-gray-700/50 rounded-2xl shadow-2xl z-40 overflow-hidden"
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                    >
+                        <header className="flex items-center justify-between p-4 border-b border-gray-700/50">
+                            <h3 className="text-lg font-semibold text-white">Notifications</h3>
+                            <div className="flex items-center gap-4">
+                                {unreadCount > 0 && (
+                                    <button onClick={handleMarkAllAsRead} className="text-sm text-blue-400 hover:text-blue-300">
+                                        Mark all as read
+                                    </button>
+                                )}
+                                <button onClick={onClose} className="text-gray-400 hover:text-white">
+                                    <CloseIcon className="w-5 h-5" />
+                                </button>
+                            </div>
+                        </header>
+                        <div className="max-h-[60vh] overflow-y-auto">
+                            {notifications.length > 0 ? (
+                                notifications.map(n => <NotificationItem key={n.id} notification={n} onMarkAsRead={handleMarkAsRead} />)
+                            ) : (
+                                <div className="p-8 text-center text-gray-500">
+                                    <BellRing className="w-12 h-12 mx-auto mb-2" />
+                                    <p>No new notifications</p>
+                                </div>
+                            )}
+                        </div>
+                    </motion.div>
+                </>
+            )}
+        </AnimatePresence>
+    );
+};
+
+export default NotificationsPanel;

@@ -92,10 +92,10 @@ const MapView: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <div className="lg:col-span-3">
                     <div className="relative bg-gray-900/60 border border-gray-700/50 rounded-2xl overflow-hidden aspect-[1000/600] cursor-crosshair">
-                        <MapContainer center={center} zoom={4} scrollWheelZoom={true} style={{ height: '100%', width: '100%', backgroundColor: '#030712' }}>
+                        <MapContainer center={center} zoom={4} scrollWheelZoom={true} style={{ height: '100%', width: '100%', backgroundColor: '#f0f0f0' }}>
                             <TileLayer
                                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
                             />
                             <MapEvents onMapClick={handleMapClick} />
                             
@@ -113,7 +113,7 @@ const MapView: React.FC = () => {
                                 >
                                     <Popup>
                                         <div className="text-sm">
-                                            <p className="font-bold text-base text-white mb-1">{loc.name}</p>
+                                            <p className="font-bold text-base text-gray-900 mb-1">{loc.name}</p>
                                             <p>Simulated AQI: <span className="font-bold" style={{color: aqiToColor(loc.value)}}>{loc.value}</span></p>
                                         </div>
                                     </Popup>
