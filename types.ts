@@ -1,0 +1,78 @@
+export type View = 'dashboard' | 'map' | 'alerts' | 'workouts' | 'profile';
+
+export interface User {
+    id: string;
+    name: string;
+    email: string;
+    location: string;
+    primaryActivity: 'Running' | 'Cycling' | 'Hiking';
+}
+
+export interface LiveTelemetryData {
+    aqi: number;
+    o2: number;
+    co: number;
+    so2: number;
+    no2: number;
+    pm25: number;
+}
+
+export interface Alert {
+    id: number;
+    title: string;
+    description: string;
+    enabled: boolean;
+}
+
+export interface WeatherData {
+    temperature: number;
+    condition: string;
+    humidity: number;
+    windSpeed: number;
+    visibility: number;
+    uvIndex: number;
+}
+
+export interface AQIData {
+    location: string;
+    ozone: number;
+    no2: number;
+    pm25: number;
+}
+
+export interface ActivityRecommendation {
+    activity: string;
+    time: string;
+    location:string;
+    score: number;
+}
+
+export interface PollutantBreakdown {
+    pollutant: string;
+    level: string;
+    effect: string;
+}
+
+export interface AetherFitResponse {
+    aqfaScore: number;
+    summary: string;
+    recommendations: ActivityRecommendation[];
+    pollutantBreakdown: PollutantBreakdown[];
+}
+
+export interface Workout {
+    id: number;
+    type: 'Running' | 'Cycling' | 'Hiking';
+    duration: number; // in minutes
+    location: string;
+    date: string;
+    avgAqfa: number;
+    performance: number; // user-defined score 1-10
+}
+
+export interface AtmosphericData {
+    co: { value: number, unit: string };
+    so2: { value: number, unit: string };
+    formaldehyde: { value: number, unit: string };
+    uvAerosolIndex: { value: number, unit: string };
+}

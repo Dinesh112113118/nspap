@@ -1,0 +1,116 @@
+import type { WeatherData, AQIData, Workout, LiveTelemetryData, Alert, AtmosphericData } from '../types';
+
+export const getMockWeatherData = (): WeatherData => ({
+    temperature: 72,
+    condition: 'Clear Sky',
+    humidity: 65,
+    windSpeed: 8,
+    visibility: 10,
+    uvIndex: 6,
+});
+
+export const getMockAqiData = (): AQIData => ({
+    location: 'San Francisco, CA',
+    ozone: 35, // ppb
+    no2: 12, // ppb
+    pm25: 8, // µg/m³
+});
+
+export const getMockWorkouts = (): Workout[] => [
+    { id: 1, type: 'Running', duration: 45, location: 'Golden Gate Park', date: '2025-09-02', avgAqfa: 7.6, performance: 8 },
+    { id: 2, type: 'Cycling', duration: 75, location: 'Embarcadero Trail', date: '2025-09-01', avgAqfa: 8.1, performance: 9 },
+    { id: 3, type: 'Running', duration: 30, location: 'Lake Merced', date: '2025-08-30', avgAqfa: 6.5, performance: 7 },
+    { id: 4, type: 'Hiking', duration: 120, location: 'Twin Peaks', date: '2025-08-28', avgAqfa: 9.2, performance: 10 },
+    { id: 5, type: 'Running', duration: 50, location: 'Golden Gate Park', date: '2025-08-27', avgAqfa: 7.8, performance: 8 },
+];
+
+export const performanceChartData = [
+    { name: 'Mon', aqfa: 8.1, performance: 9 },
+    { name: 'Tue', aqfa: 7.8, performance: 8 },
+    { name: 'Wed', aqfa: 6.5, performance: 7 },
+    { name: 'Thu', aqfa: 9.2, performance: 10 },
+    { name: 'Fri', aqfa: 7.6, performance: 8 },
+    { name: 'Sat', aqfa: 8.5, performance: 9 },
+    { name: 'Sun', aqfa: 9.0, performance: 9 },
+];
+
+// Generates consistent mock telemetry data based on coordinates.
+// Using coordinates as a seed ensures that clicking the same spot yields the same data.
+export const generateTelemetryForCoordinates = (x: number, y: number): LiveTelemetryData => {
+    const seed = (x * 1000) + y;
+    const random = (s: number) => {
+        const x = Math.sin(s) * 10000;
+        return x - Math.floor(x);
+    };
+
+    const aqi = Math.floor(random(seed) * 200) + 10;
+    const o2 = 20.95 - random(seed * 2) * 0.1;
+    const co = random(seed * 3) * 500;
+    const so2 = random(seed * 4) * 5;
+    const no2 = random(seed * 5) * 40;
+    const pm25 = random(seed * 6) * 25;
+
+    return {
+        aqi: Math.round(aqi),
+        o2: parseFloat(o2.toFixed(2)),
+        co: parseFloat(co.toFixed(1)),
+        so2: parseFloat(so2.toFixed(2)),
+        no2: parseFloat(no2.toFixed(1)),
+        pm25: parseFloat(pm25.toFixed(1)),
+    };
+};
+
+
+export const getMockAlerts = (): Alert[] => [
+    { id: 1, title: 'Poor AQFA for Morning Run', description: 'Notify me if AQFA score for Running is below 4 between 6 AM - 9 AM.', enabled: true },
+    { id: 2, title: 'High PM2.5 Levels', description: 'Notify me if PM2.5 levels exceed 35 µg/m³ in my area.', enabled: true },
+    { id: 3, title: 'Optimal Cycling Conditions', description: 'Notify me when AQFA score for Cycling is above 8.', enabled: false },
+    { id: 4, title: 'High Ozone Alert', description: 'Notify me if Ozone levels are high during the afternoon.', enabled: true },
+];
+
+
+export const getMockAtmosphericCompositionData = (): AtmosphericData => ({
+    co: { value: 250.5, unit: 'ppb' },
+    so2: { value: 2.1, unit: 'ppb' },
+    formaldehyde: { value: 1.8, unit: 'ppb' },
+    uvAerosolIndex: { value: -0.5, unit: '' },
+});
+
+export const getAqi24HourTrendData = () => {
+    const data = [];
+    const now = new Date();
+    let currentAqi = 45;
+    // Past 18 hours (actual data)
+    for (let i = 18; i > 0; i--) {
+        const time = new Date(now.getTime() - i * 60 * 60 * 1000);
+        currentAqi += (Math.random() - 0.5) * 5;
+        currentAqi = Math.max(10, Math.min(150, currentAqi));
+        data.push({
+            time: `${time.getHours()}:00`,
+            aqi: Math.round(currentAqi),
+        });
+    }
+    
+    // Future 6 hours (predicted data)
+    let lastActualAqi = currentAqi;
+    for (let i = 0; i <= 6; i++) {
+        const time = new Date(now.getTime() + i * 60 * 60 * 1000);
+        let predictedAqi = lastActualAqi + (Math.random() - 0.45) * 6; // Tend to increase slightly
+        predictedAqi = Math.max(10, Math.min(150, predictedAqi));
+        
+        const point: {time: string, aqi?: number, prediction?: number} = {
+            time: `${time.getHours()}:00`,
+        };
+
+        if (i === 0) {
+            point.aqi = Math.round(lastActualAqi);
+            point.prediction = Math.round(lastActualAqi);
+        } else {
+             point.prediction = Math.round(predictedAqi);
+        }
+
+        data.push(point);
+        lastActualAqi = predictedAqi;
+    }
+    return data;
+};

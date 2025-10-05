@@ -1,0 +1,73 @@
+import React, { useState } from 'react';
+import Sidebar from './components/Sidebar';
+import Dashboard from './components/Dashboard';
+import Workouts from './components/Workouts';
+import MapView from './components/MapView';
+import Alerts from './components/Alerts';
+import Header from './components/Header';
+import type { View } from './types';
+import { useAuth } from './contexts/AuthContext';
+
+const MainApp: React.FC = () => {
+  const [currentView, setCurrentView] = useState<View>('dashboard');
+  const { user } = useAuth();
+
+  const renderContent = () => {
+    switch (currentView) {
+      case 'dashboard':
+        return <Dashboard />;
+      case 'workouts':
+        return <Workouts />;
+      case 'map':
+        return <MapView />;
+      case 'alerts':
+        return <Alerts />;
+      case 'profile':
+        return (
+            <div className="p-8">
+                <h1 className="text-3xl font-bold text-white">Commander Profile</h1>
+                <div className="mt-6 bg-gray-900/60 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 max-w-lg">
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center py-2 border-b border-gray-700/50">
+                            <span className="text-gray-400">Name:</span>
+                            <span className="text-white font-semibold">{user?.name}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-b border-gray-700/50">
+                            <span className="text-gray-400">Email:</span>
+                            <span className="text-white font-semibold">{user?.email}</span>
+                        </div>
+                         <div className="flex justify-between items-center py-2 border-b border-gray-700/50">
+                            <span className="text-gray-400">Home Location:</span>
+                            <span className="text-white font-semibold">{user?.location}</span>
+                        </div>
+                         <div className="flex justify-between items-center py-2">
+                            <span className="text-gray-400">Primary Activity:</span>
+                            <span className="text-white font-semibold">{user?.primaryActivity}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+      default:
+        return <Dashboard />;
+    }
+  };
+
+  if (!user) {
+    return null; // Or a loading spinner, though App.tsx should prevent this state
+  }
+
+  return (
+    <div className="flex h-screen bg-gray-900 font-sans">
+      <Sidebar currentView={currentView} setCurrentView={setCurrentView} />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header />
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-black/20">
+          {renderContent()}
+        </main>
+      </div>
+    </div>
+  );
+};
+
+export default MainApp;

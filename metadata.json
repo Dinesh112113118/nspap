@@ -1,0 +1,5 @@
+{
+  "name": "AetherFit",
+  "description": "A specialized web application that acts as a personal air quality coach for athletes and active individuals, providing 'Air Quality for Activity' (AQFA) scores and actionable recommendations using Gemini.",
+  "requestFramePermissions": []
+}

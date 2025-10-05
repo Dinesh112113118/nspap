@@ -1,0 +1,39 @@
+import React, { useState } from 'react';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import LoginPage from './components/LoginPage';
+import RegisterPage from './components/RegisterPage';
+import MainApp from './MainApp';
+
+const AppContent: React.FC = () => {
+    const { isAuthenticated, isLoading } = useAuth();
+    const [showRegister, setShowRegister] = useState(false);
+
+    if (isLoading) {
+        return (
+            <div className="flex h-screen w-full items-center justify-center bg-gray-900">
+                <p className="text-white">Initializing Mission Control...</p>
+            </div>
+        );
+    }
+    
+    if (!isAuthenticated) {
+        return showRegister ? (
+            <RegisterPage onSwitchToLogin={() => setShowRegister(false)} />
+        ) : (
+            <LoginPage onSwitchToRegister={() => setShowRegister(true)} />
+        );
+    }
+
+    return <MainApp />;
+};
+
+
+const App: React.FC = () => {
+  return (
+    <AuthProvider>
+        <AppContent />
+    </AuthProvider>
+  );
+};
+
+export default App;
